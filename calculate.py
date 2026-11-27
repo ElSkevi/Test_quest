@@ -23,7 +23,7 @@ def normalize_status(raw_status):
     if status == "canceled":
         status = "cancelled"
     if status not in ALLOWED_STATUSES:
-        raise ValueError(f"Неизвестный статус: {raw_status!r}")
+        raise ValueError(f"Unknown status: {raw_status!r}")
     return status
 
 
@@ -34,11 +34,11 @@ def read_orders(path):
         reader = csv.DictReader(f)
         if reader.fieldnames != COLUMNS:
             raise ValueError(
-                f"Ожидались колонки {COLUMNS}, получены {reader.fieldnames}"
+                f"Expected columns {COLUMNS}, got {reader.fieldnames}"
             )
         for line_number, row in enumerate(reader, start=2):
             if None in row or any(row[column] is None for column in COLUMNS):
-                raise ValueError(f"Строка {line_number}: неверное число колонок")
+                raise ValueError(f"Line {line_number}: wrong number of columns")
             orders.append(
                 {
                     "order_id": row["order_id"].strip(),
@@ -79,7 +79,7 @@ def aggregate(orders):
             price = Decimal(order["price"])
         except (ValueError, InvalidOperation):
             raise ValueError(
-                f"Заказ {order['order_id']}: неверные quantity/price "
+                f"Order {order['order_id']}: invalid quantity/price "
                 f"({order['quantity']!r}, {order['price']!r})"
             )
 
@@ -104,8 +104,8 @@ def main():
     totals = aggregate(orders)
     write_report(totals, OUTPUT_PATH)
     print(
-        f"Готово: {OUTPUT_PATH.name}, строк: {len(totals)}, "
-        f"уникальных заказов: {len(orders)}"
+        f"Done: {OUTPUT_PATH.name}, rows: {len(totals)}, "
+        f"unique orders: {len(orders)}"
     )
 
 
